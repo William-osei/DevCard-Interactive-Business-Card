@@ -324,7 +324,7 @@ class AIChat {
         this.isOpen = false;
         this.responses = {
             'skills': "William is proficient in HTML, CSS, JavaScript, Python, and Git. He's currently learning React and always exploring new technologies!",
-            'projects': "William has worked on personal portfolios, this amazing DevCard, the Smart Calculator Pro with advanced scientific functions, Snake Game, IoT Weather Station, and various other projects. Check out his GitHub!",
+            'projects': "William has worked on personal portfolios, this DevCard project, the Smart Calculator Pro with advanced scientific functions, Snake Game, IoT Weather Station, and various other projects. Check out his GitHub!",
             'calculator': "William built Smart Calculator Pro - an advanced scientific calculator with memory operations, keyboard support, and responsive design. You can find it at https://github.com/William-osei/smart-calculator-pro!",
             'education': "William is a Computer Engineering student at KNUST (Kwame Nkrumah University of Science and Technology) in Ghana, started in 2023.",
             'contact': "You can reach William at trickskidwilliam@gmail.com or connect on LinkedIn and GitHub. He's always open to collaboration!",
@@ -1075,8 +1075,73 @@ class DevCard {
 // Global functions for HTML onclick events
 function flipCard() {
     const card = document.querySelector('.dev-card');
+    const cardContainer = document.querySelector('.card-container');
+    
+    // Add flip animation effect
     card.classList.toggle('flipped');
     devCardInstance.isFlipped = !devCardInstance.isFlipped;
+    
+    // Add visual feedback
+    cardContainer.style.transform = 'scale(0.98)';
+    setTimeout(() => {
+        cardContainer.style.transform = '';
+    }, 150);
+    
+    // Update button text based on card state
+    const contactBtn = card.querySelector('.btn.primary');
+    const backBtn = card.querySelector('.back-button');
+    
+    if (devCardInstance.isFlipped) {
+        // Card is now showing back (contact side)
+        if (contactBtn) contactBtn.textContent = 'Back to Profile';
+        // Show notification
+        if (devCardInstance) {
+            devCardInstance.showNotification('💼 Contact information displayed!', 'info');
+        }
+        // Focus on the first input field
+        setTimeout(() => {
+            const firstInput = document.getElementById('senderName');
+            if (firstInput) firstInput.focus();
+        }, 300);
+    } else {
+        // Card is now showing front (profile side)
+        if (contactBtn) {
+            contactBtn.innerHTML = '<i class="fas fa-envelope"></i> Contact Me';
+        }
+        if (devCardInstance) {
+            devCardInstance.showNotification('👨‍💻 Profile view restored!', 'info');
+        }
+    }
+    
+// Play flip sound effect (if available)
+    playFlipSound();
+}
+
+// Sound effect function
+function playFlipSound() {
+    // Create a subtle flip sound using Web Audio API
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Create a short "whoosh" sound
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.15);
+        
+        oscillator.type = 'sine';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+    } catch (error) {
+        // Silently fail if Web Audio API is not supported
+        console.log('Web Audio API not supported');
+    }
 }
 
 function shareCard() {

@@ -13,7 +13,7 @@ A modern, interactive web-based business card that showcases development skills 
 - **Live GitHub Data** - Shows real repository count and follower stats  
 - **Theme Toggle** - Switch between light and dark modes
 - **QR Code Sharing** - Auto-generated QR code for easy sharing
-- **Responsive Design** - Works perfectly on all devices
+- **Responsive Design** - Works well on desktop, tablet, and mobile
 
 ### Interactive Games & Tools
 - **Typing Speed Test** - Test your WPM with programming quotes
