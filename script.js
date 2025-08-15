@@ -1,4 +1,488 @@
 // DevCard - Interactive Developer Business Card JavaScript
+// Advanced Version with Games, Analytics, AI Chat, and More!
+
+class DevCard {
+    constructor() {
+        this.isFlipped = false;
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.githubUsername = 'William-osei';
+        this.typingTest = new TypingTest();
+        this.codeRunner = new CodeRunner();
+        this.memoryGame = new MemoryGame();
+        this.aiChat = new AIChat();
+        this.analytics = new Analytics();
+        this.particleSystem = null;
+        this.init();
+    }
+
+class TypingTest {
+    constructor() {
+        this.texts = [
+            "The quick brown fox jumps over the lazy dog. This pangram contains every letter of the alphabet.",
+            "Programming is the art of telling another human being what one wants the computer to do. - Donald Knuth",
+            "Code is like humor. When you have to explain it, it's bad. - Cory House",
+            "First, solve the problem. Then, write the code. - John Johnson",
+            "Experience is the name everyone gives to their mistakes. - Oscar Wilde"
+        ];
+        this.currentText = '';
+        this.startTime = 0;
+        this.isActive = false;
+        this.errors = 0;
+        this.currentIndex = 0;
+        this.wpm = 0;
+        this.accuracy = 100;
+        this.timeLeft = 60;
+        this.timer = null;
+    }
+
+    start() {
+        this.currentText = this.texts[Math.floor(Math.random() * this.texts.length)];
+        document.getElementById('typingText').textContent = this.currentText;
+        document.getElementById('typingInput').disabled = false;
+        document.getElementById('typingInput').value = '';
+        document.getElementById('typingInput').focus();
+        document.getElementById('startTyping').textContent = 'Reset';
+        
+        this.startTime = Date.now();
+        this.isActive = true;
+        this.errors = 0;
+        this.currentIndex = 0;
+        this.timeLeft = 60;
+        
+        this.timer = setInterval(() => {
+            this.timeLeft--;
+            document.getElementById('timer').textContent = this.timeLeft;
+            
+            if (this.timeLeft <= 0) {
+                this.end();
+            }
+        }, 1000);
+        
+        document.getElementById('typingInput').addEventListener('input', this.handleInput.bind(this));
+    }
+
+    handleInput(e) {
+        if (!this.isActive) return;
+        
+        const typed = e.target.value;
+        const expected = this.currentText.substring(0, typed.length);
+        
+        // Calculate errors
+        this.errors = 0;
+        for (let i = 0; i < typed.length; i++) {
+            if (typed[i] !== this.currentText[i]) {
+                this.errors++;
+            }
+        }
+        
+        // Calculate WPM
+        const timeElapsed = (Date.now() - this.startTime) / 60000;
+        const wordsTyped = typed.length / 5;
+        this.wpm = Math.round(wordsTyped / timeElapsed) || 0;
+        
+        // Calculate accuracy
+        this.accuracy = typed.length > 0 ? Math.round(((typed.length - this.errors) / typed.length) * 100) : 100;
+        
+        // Update display
+        document.getElementById('wpm').textContent = this.wpm;
+        document.getElementById('accuracy').textContent = this.accuracy + '%';
+        
+        // Check if completed
+        if (typed === this.currentText) {
+            this.end();
+        }
+    }
+
+    end() {
+        this.isActive = false;
+        clearInterval(this.timer);
+        document.getElementById('typingInput').disabled = true;
+        document.getElementById('startTyping').textContent = 'Start Test';
+        
+        // Show results
+        const message = `Test completed! WPM: ${this.wpm}, Accuracy: ${this.accuracy}%`;
+        devCardInstance.showNotification(message, 'success');
+    }
+}
+
+class CodeRunner {
+    constructor() {
+        this.setupCodeRunner();
+    }
+
+    setupCodeRunner() {
+        document.getElementById('runCode').addEventListener('click', this.runCode.bind(this));
+        document.getElementById('clearCode').addEventListener('click', this.clearCode.bind(this));
+    }
+
+    runCode() {
+        const code = document.getElementById('codeInput').value;
+        const output = document.getElementById('codeOutput');
+        
+        // Clear previous output
+        output.textContent = '';
+        
+        // Capture console.log output
+        const originalLog = console.log;
+        const logs = [];
+        
+        console.log = (...args) => {
+            logs.push(args.join(' '));
+        };
+        
+        try {
+            // Create a safer eval environment
+            const result = Function(code)();
+            if (result !== undefined) {
+                logs.push(`Return value: ${result}`);
+            }
+            if (logs.length === 0) {
+                logs.push('Code executed successfully (no output)');
+            }
+        } catch (error) {
+            logs.push(`Error: ${error.message}`);
+        } finally {
+            // Restore original console.log
+            console.log = originalLog;
+        }
+        
+        output.textContent = logs.join('\n');
+        
+        // Add syntax highlighting effect
+        output.style.color = logs.some(log => log.startsWith('Error:')) ? '#ff6b6b' : '#00ff00';
+    }
+
+    clearCode() {
+        document.getElementById('codeInput').value = '';
+        document.getElementById('codeOutput').textContent = 'Click "Run Code" to see output...';
+    }
+}
+
+class MemoryGame {
+    constructor() {
+        this.cards = [];
+        this.flippedCards = [];
+        this.matchedCards = [];
+        this.level = 1;
+        this.score = 0;
+        this.lives = 3;
+        this.symbols = ['🚀', '💻', '⚡', '🔥', '🎯', '🌟', '💡', '🎨', '🔧', '📱', '🎮', '🏆'];
+        this.setupGame();
+    }
+
+    setupGame() {
+        document.getElementById('startMemory').addEventListener('click', this.startGame.bind(this));
+    }
+
+    startGame() {
+        this.resetGame();
+        this.createCards();
+        this.renderCards();
+    }
+
+    resetGame() {
+        this.cards = [];
+        this.flippedCards = [];
+        this.matchedCards = [];
+        this.score = 0;
+        this.lives = 3;
+        this.updateStats();
+    }
+
+    createCards() {
+        const pairsCount = Math.min(4 + this.level, 8);
+        const selectedSymbols = this.symbols.slice(0, pairsCount);
+        
+        // Create pairs
+        this.cards = [...selectedSymbols, ...selectedSymbols]
+            .map((symbol, index) => ({ id: index, symbol, flipped: false, matched: false }))
+            .sort(() => Math.random() - 0.5);
+    }
+
+    renderCards() {
+        const grid = document.getElementById('memoryGrid');
+        grid.innerHTML = '';
+        
+        this.cards.forEach((card, index) => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'memory-card';
+            cardElement.dataset.cardId = index;
+            cardElement.textContent = card.flipped || card.matched ? card.symbol : '?';
+            cardElement.addEventListener('click', () => this.flipCard(index));
+            
+            if (card.matched) {
+                cardElement.classList.add('matched');
+            } else if (card.flipped) {
+                cardElement.classList.add('flipped');
+            }
+            
+            grid.appendChild(cardElement);
+        });
+    }
+
+    flipCard(cardIndex) {
+        const card = this.cards[cardIndex];
+        
+        if (card.flipped || card.matched || this.flippedCards.length >= 2) {
+            return;
+        }
+        
+        card.flipped = true;
+        this.flippedCards.push(cardIndex);
+        this.renderCards();
+        
+        if (this.flippedCards.length === 2) {
+            setTimeout(() => this.checkMatch(), 1000);
+        }
+    }
+
+    checkMatch() {
+        const [first, second] = this.flippedCards;
+        const firstCard = this.cards[first];
+        const secondCard = this.cards[second];
+        
+        if (firstCard.symbol === secondCard.symbol) {
+            firstCard.matched = true;
+            secondCard.matched = true;
+            this.matchedCards.push(first, second);
+            this.score += 10;
+            
+            if (this.matchedCards.length === this.cards.length) {
+                this.levelUp();
+            }
+        } else {
+            firstCard.flipped = false;
+            secondCard.flipped = false;
+            this.lives--;
+            
+            if (this.lives <= 0) {
+                this.gameOver();
+            }
+        }
+        
+        this.flippedCards = [];
+        this.updateStats();
+        this.renderCards();
+    }
+
+    levelUp() {
+        this.level++;
+        this.lives = Math.min(this.lives + 1, 5);
+        devCardInstance.showNotification(`Level ${this.level}! Great job! 🎉`, 'success');
+        setTimeout(() => this.startGame(), 2000);
+    }
+
+    gameOver() {
+        devCardInstance.showNotification(`Game Over! Final Score: ${this.score}`, 'error');
+        document.getElementById('startMemory').textContent = 'Start Game';
+    }
+
+    updateStats() {
+        document.getElementById('memoryLevel').textContent = this.level;
+        document.getElementById('memoryScore').textContent = this.score;
+        document.getElementById('memoryLives').textContent = this.lives;
+    }
+}
+
+class AIChat {
+    constructor() {
+        this.isOpen = false;
+        this.responses = {
+            'skills': "William is proficient in HTML, CSS, JavaScript, Python, and Git. He's currently learning React and always exploring new technologies!",
+            'projects': "William has worked on personal portfolios, this amazing DevCard, calculator apps, and various Python learning projects. Check out his GitHub!",
+            'education': "William is a Computer Engineering student at KNUST (Kwame Nkrumah University of Science and Technology) in Ghana, started in 2023.",
+            'contact': "You can reach William at trickskidwilliam@gmail.com or connect on LinkedIn and GitHub. He's always open to collaboration!",
+            'experience': "William is building his experience through personal projects, coursework, and continuous learning. He's passionate about web development and software engineering.",
+            'hobbies': "Besides coding, William enjoys exploring new technologies, working on creative projects, and connecting with fellow developers.",
+            'goals': "William aims to become a skilled full-stack developer and contribute to meaningful projects that make a difference.",
+            'default': "I'm here to help you learn about William! Ask me about his skills, projects, education, or anything else you'd like to know! 🚀"
+        };
+        this.setupChat();
+    }
+
+    setupChat() {
+        document.getElementById('chatToggle').addEventListener('click', this.toggleChat.bind(this));
+        document.getElementById('chatClose').addEventListener('click', this.closeChat.bind(this));
+        document.getElementById('sendMessage').addEventListener('click', this.sendMessage.bind(this));
+        document.getElementById('chatInputField').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+    }
+
+    toggleChat() {
+        this.isOpen = !this.isOpen;
+        const chatWindow = document.getElementById('chatWindow');
+        chatWindow.classList.toggle('active', this.isOpen);
+    }
+
+    closeChat() {
+        this.isOpen = false;
+        document.getElementById('chatWindow').classList.remove('active');
+    }
+
+    sendMessage() {
+        const input = document.getElementById('chatInputField');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        this.addMessage(message, 'user');
+        input.value = '';
+        
+        // Simulate AI thinking
+        setTimeout(() => {
+            const response = this.generateResponse(message);
+            this.addMessage(response, 'ai');
+        }, 1000);
+    }
+
+    addMessage(text, type) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message`;
+        
+        const icon = type === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+        messageDiv.innerHTML = `${icon}<p>${text}</p>`;
+        
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    generateResponse(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        for (const [key, response] of Object.entries(this.responses)) {
+            if (key !== 'default' && lowerMessage.includes(key)) {
+                return response;
+            }
+        }
+        
+        // Check for greetings
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+            return "Hello! 👋 I'm William's AI assistant. How can I help you learn more about him today?";
+        }
+        
+        // Check for thanks
+        if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+            return "You're welcome! Feel free to ask me anything else about William! 😊";
+        }
+        
+        return this.responses.default;
+    }
+}
+
+class Analytics {
+    constructor() {
+        this.charts = {};
+        this.setupAnalytics();
+    }
+
+    setupAnalytics() {
+        this.generateMockData();
+        this.createCharts();
+    }
+
+    generateMockData() {
+        // Simulate some coding stats
+        document.getElementById('linesOfCode').textContent = '12,450+';
+        document.getElementById('codingTime').textContent = '247h';
+        document.getElementById('streakDays').textContent = '28';
+        document.getElementById('achievements').textContent = '15';
+        
+        // Animate the numbers
+        this.animateNumbers();
+    }
+
+    animateNumbers() {
+        const elements = ['linesOfCode', 'codingTime', 'streakDays', 'achievements'];
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            element.style.animation = 'pulse 2s ease-in-out infinite alternate';
+        });
+    }
+
+    createCharts() {
+        this.createActivityChart();
+        this.createSkillsChart();
+        this.createLanguagesChart();
+    }
+
+    createActivityChart() {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        this.charts.activity = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Commits',
+                    data: [12, 19, 3, 5, 2, 3, 7],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    createSkillsChart() {
+        const ctx = document.getElementById('skillsChart').getContext('2d');
+        this.charts.skills = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['HTML', 'CSS', 'JavaScript', 'Python', 'Git', 'React'],
+                datasets: [{
+                    label: 'Skill Level',
+                    data: [85, 80, 70, 75, 65, 30],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    createLanguagesChart() {
+        const ctx = document.getElementById('languagesChart').getContext('2d');
+        this.charts.languages = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['JavaScript', 'HTML', 'CSS', 'Python'],
+                datasets: [{
+                    data: [40, 25, 20, 15],
+                    backgroundColor: ['#f39c12', '#e74c3c', '#3498db', '#27ae60']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+}
 
 class DevCard {
     constructor() {
@@ -345,11 +829,192 @@ function addRainbowAnimation() {
     document.head.appendChild(style);
 }
 
+// Initialize particles and 3D background
+function initParticles() {
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: '#3498db'
+                },
+                shape: {
+                    type: 'circle',
+                    stroke: {
+                        width: 0,
+                        color: '#000000'
+                    }
+                },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: {
+                        enable: false,
+                        speed: 1,
+                        opacity_min: 0.1,
+                        sync: false
+                    }
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    anim: {
+                        enable: false,
+                        speed: 40,
+                        size_min: 0.1,
+                        sync: false
+                    }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#3498db',
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false,
+                    attract: {
+                        enable: false,
+                        rotateX: 600,
+                        rotateY: 1200
+                    }
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: 'repulse'
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: 'push'
+                    },
+                    resize: true
+                },
+                modes: {
+                    grab: {
+                        distance: 400,
+                        line_linked: {
+                            opacity: 1
+                        }
+                    },
+                    bubble: {
+                        distance: 400,
+                        size: 40,
+                        duration: 2,
+                        opacity: 8,
+                        speed: 3
+                    },
+                    repulse: {
+                        distance: 200,
+                        duration: 0.4
+                    },
+                    push: {
+                        particles_nb: 4
+                    },
+                    remove: {
+                        particles_nb: 2
+                    }
+                }
+            },
+            retina_detect: true
+        });
+    }
+}
+
+// Initialize 3D background animation
+function init3DBackground() {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Simple animated gradient background
+    let time = 0;
+    
+    function animate() {
+        time += 0.01;
+        
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        const color1 = `hsl(${200 + Math.sin(time) * 30}, 70%, 50%)`;
+        const color2 = `hsl(${280 + Math.cos(time) * 30}, 70%, 30%)`;
+        
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+}
+
+// Initialize typing test game
+function initTypingTest() {
+    const startButton = document.getElementById('startTyping');
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            if (devCardInstance.typingTest) {
+                devCardInstance.typingTest.start();
+            }
+        });
+    }
+}
+
+// Loading screen management
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+    }, 2000); // Show loading for 2 seconds
+}
+
 // Initialize the DevCard when DOM is loaded
 let devCardInstance;
+let typingTest, codeRunner, memoryGame, aiChat, analytics;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize main DevCard
     devCardInstance = new DevCard();
+    
+    // Initialize games and features after a short delay to ensure DOM is ready
+    setTimeout(() => {
+        typingTest = new TypingTest();
+        codeRunner = new CodeRunner();
+        memoryGame = new MemoryGame();
+        aiChat = new AIChat();
+        analytics = new Analytics();
+    }, 100);
+    
+    // Initialize background effects
+    initParticles();
+    init3DBackground();
+    hideLoadingScreen();
+    
+    // Add easter eggs and animations
     addEasterEggs();
     addRainbowAnimation();
     
@@ -357,16 +1022,54 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     });
+    
+    // GSAP animations for enhanced visual effects
+    if (typeof gsap !== 'undefined') {
+        gsap.from('.dev-card', {
+            duration: 1,
+            scale: 0.8,
+            opacity: 0,
+            ease: 'back.out(1.7)',
+            delay: 2.2
+        });
+        
+        gsap.from('.analytics-dashboard', {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            ease: 'power2.out',
+            delay: 2.5,
+            scrollTrigger: {
+                trigger: '.analytics-dashboard',
+                start: 'top 80%'
+            }
+        });
+        
+        gsap.from('.games-section', {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            ease: 'power2.out',
+            delay: 2.7,
+            scrollTrigger: {
+                trigger: '.games-section',
+                start: 'top 80%'
+            }
+        });
+    }
     
     // Add loading animation completion
     setTimeout(() => {
         document.body.classList.add('loaded');
-    }, 500);
+    }, 2500);
 });
 
 // Performance optimization: Intersection Observer for animations

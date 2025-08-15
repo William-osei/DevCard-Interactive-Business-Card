@@ -6,8 +6,27 @@
     <title>DevCard - William Osei Aborah</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Advanced Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading DevCard...</h2>
+            <p>Preparing an amazing experience</p>
+        </div>
+    </div>
     <div class="theme-toggle">
         <button id="themeToggle" title="Toggle Theme">
             <i class="fas fa-sun"></i>
@@ -162,11 +181,145 @@
         </div>
     </div>
 
+    <!-- Analytics Dashboard -->
+    <div class="analytics-dashboard">
+        <h2>📊 Developer Analytics</h2>
+        <div class="dashboard-grid">
+            <div class="chart-container">
+                <h3>GitHub Activity</h3>
+                <canvas id="activityChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Skills Radar</h3>
+                <canvas id="skillsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Languages Used</h3>
+                <canvas id="languagesChart"></canvas>
+            </div>
+            <div class="live-stats">
+                <h3>🔥 Live Stats</h3>
+                <div class="stat-grid">
+                    <div class="live-stat-item">
+                        <i class="fas fa-code"></i>
+                        <span class="stat-value" id="linesOfCode">Loading...</span>
+                        <span class="stat-desc">Lines of Code</span>
+                    </div>
+                    <div class="live-stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="stat-value" id="codingTime">Loading...</span>
+                        <span class="stat-desc">Hours Coded</span>
+                    </div>
+                    <div class="live-stat-item">
+                        <i class="fas fa-fire"></i>
+                        <span class="stat-value" id="streakDays">Loading...</span>
+                        <span class="stat-desc">Day Streak</span>
+                    </div>
+                    <div class="live-stat-item">
+                        <i class="fas fa-trophy"></i>
+                        <span class="stat-value" id="achievements">Loading...</span>
+                        <span class="stat-desc">Achievements</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Games Section -->
+    <div class="games-section">
+        <h2>🎮 Developer Games</h2>
+        <div class="games-grid">
+            <div class="game-card" id="typingTest">
+                <h3>⚡ Typing Speed Test</h3>
+                <div class="game-content">
+                    <div class="typing-stats">
+                        <span>WPM: <span id="wpm">0</span></span>
+                        <span>Accuracy: <span id="accuracy">100%</span></span>
+                        <span>Time: <span id="timer">60</span>s</span>
+                    </div>
+                    <div class="typing-text" id="typingText">Click start to begin the typing test...</div>
+                    <input type="text" id="typingInput" placeholder="Start typing here..." disabled>
+                    <button class="btn primary" id="startTyping">Start Test</button>
+                </div>
+            </div>
+            
+            <div class="game-card" id="codeRunner">
+                <h3>🏃‍♂️ Code Runner</h3>
+                <div class="game-content">
+                    <div class="code-editor">
+                        <textarea id="codeInput" placeholder="// Write your JavaScript code here...
+console.log('Hello, World!');">
+// Try this JavaScript code!
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n-1) + fibonacci(n-2);
+}
+
+console.log('Fibonacci sequence:');
+for(let i = 0; i < 10; i++) {
+  console.log(`F(${i}) = ${fibonacci(i)}`);
+}</textarea>
+                    </div>
+                    <div class="code-controls">
+                        <button class="btn primary" id="runCode">▶ Run Code</button>
+                        <button class="btn secondary" id="clearCode">🗑 Clear</button>
+                    </div>
+                    <div class="code-output">
+                        <h4>Output:</h4>
+                        <pre id="codeOutput">Click "Run Code" to see output...</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-card" id="memoryGame">
+                <h3>🧠 Code Memory Game</h3>
+                <div class="game-content">
+                    <div class="memory-stats">
+                        <span>Level: <span id="memoryLevel">1</span></span>
+                        <span>Score: <span id="memoryScore">0</span></span>
+                        <span>Lives: <span id="memoryLives">3</span></span>
+                    </div>
+                    <div class="memory-grid" id="memoryGrid">
+                        <!-- Memory cards will be generated here -->
+                    </div>
+                    <button class="btn primary" id="startMemory">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Projects Section -->
     <div class="projects-showcase">
-        <h2>Recent Projects</h2>
+        <h2>🚀 Recent Projects</h2>
         <div class="projects-grid" id="projectsGrid">
             <!-- Projects will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- AI Chat Assistant -->
+    <div class="ai-chat-container" id="aiChat">
+        <div class="chat-toggle" id="chatToggle">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <h3>🤖 DevCard AI Assistant</h3>
+                <button class="chat-close" id="chatClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    <i class="fas fa-robot"></i>
+                    <p>Hi! I'm your DevCard AI assistant. Ask me about William's skills, projects, or anything tech-related! 🚀</p>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInputField" placeholder="Ask me anything about William..." maxlength="200">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
     </div>
 
