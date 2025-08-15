@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCard - William Osei Aborah</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="theme-toggle">
+        <button id="themeToggle" title="Toggle Theme">
+            <i class="fas fa-sun"></i>
+        </button>
+    </div>
+
+    <div class="card-container">
+        <div class="dev-card">
+            <!-- Front of the card -->
+            <div class="card-front">
+                <div class="profile-section">
+                    <div class="avatar-container">
+                        <div class="avatar">
+                            <img src="https://github.com/William-osei.png" alt="William Osei Aborah" id="profileImage">
+                            <div class="avatar-ring"></div>
+                        </div>
+                        <div class="status-indicator online"></div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h1 class="name">William Osei Aborah</h1>
+                        <p class="title">Computer Engineering Student</p>
+                        <p class="location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            KNUST, Ghana
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <div class="stat-number" id="githubRepos">Loading...</div>
+                        <div class="stat-label">Repositories</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="githubFollowers">Loading...</div>
+                        <div class="stat-label">Followers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">2023</div>
+                        <div class="stat-label">Student Since</div>
+                    </div>
+                </div>
+
+                <div class="skills-section">
+                    <h3>Tech Stack</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item" data-skill="HTML">
+                            <i class="fab fa-html5"></i>
+                            <span>HTML</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" data-skill="CSS">
+                            <i class="fab fa-css3-alt"></i>
+                            <span>CSS</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" data-skill="JavaScript">
+                            <i class="fab fa-js"></i>
+                            <span>JavaScript</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" data-skill="Python">
+                            <i class="fab fa-python"></i>
+                            <span>Python</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" data-skill="Git">
+                            <i class="fab fa-git-alt"></i>
+                            <span>Git</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" data-skill="React">
+                            <i class="fab fa-react"></i>
+                            <span>React</span>
+                            <div class="skill-progress">
+                                <div class="skill-bar learning" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn primary" onclick="flipCard()">
+                        <i class="fas fa-envelope"></i>
+                        Contact Me
+                    </button>
+                    <button class="btn secondary" onclick="shareCard()">
+                        <i class="fas fa-share"></i>
+                        Share Card
+                    </button>
+                </div>
+            </div>
+
+            <!-- Back of the card -->
+            <div class="card-back">
+                <div class="contact-section">
+                    <h2>Let's Connect!</h2>
+                    
+                    <div class="contact-links">
+                        <a href="mailto:trickskidwilliam@gmail.com" class="contact-link email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email Me</span>
+                        </a>
+                        <a href="https://github.com/William-osei" target="_blank" class="contact-link github">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://linkedin.com/in/william-osei" target="_blank" class="contact-link linkedin">
+                            <i class="fab fa-linkedin"></i>
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+
+                    <div class="quick-message">
+                        <h3>Send a Quick Message</h3>
+                        <form id="contactForm" class="message-form">
+                            <input type="text" id="senderName" placeholder="Your Name" required>
+                            <input type="email" id="senderEmail" placeholder="Your Email" required>
+                            <textarea id="message" placeholder="Your Message" rows="4" required></textarea>
+                            <button type="submit" class="btn primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="qr-section">
+                        <h3>Share This Card</h3>
+                        <div class="qr-container">
+                            <div id="qrCode"></div>
+                            <p>Scan to share this DevCard</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn secondary back-button" onclick="flipCard()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Projects Section -->
+    <div class="projects-showcase">
+        <h2>Recent Projects</h2>
+        <div class="projects-grid" id="projectsGrid">
+            <!-- Projects will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Floating elements for visual appeal -->
+    <div class="floating-elements">
+        <div class="floating-icon" style="--delay: 0s">
+            <i class="fab fa-html5"></i>
+        </div>
+        <div class="floating-icon" style="--delay: 1s">
+            <i class="fab fa-css3-alt"></i>
+        </div>
+        <div class="floating-icon" style="--delay: 2s">
+            <i class="fab fa-js"></i>
+        </div>
+        <div class="floating-icon" style="--delay: 3s">
+            <i class="fab fa-python"></i>
+        </div>
+        <div class="floating-icon" style="--delay: 4s">
+            <i class="fab fa-git-alt"></i>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
