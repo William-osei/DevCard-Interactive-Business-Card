@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Flip Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .status {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .log-entry {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🔄 Simple Card Flip Test</h1>
+        <p>Direct test of the card flip functionality with real-time monitoring</p>
+    </div>
+    
+    <div class="instructions">
+        <h3>🎯 How to Test:</h3>
+        <ol>
+            <li><strong>Wait for Loading:</strong> Let the card fully load (look for the blue pulse effect)</li>
+            <li><strong>Click Test:</strong> Use the "Contact Me" button in the card below</li>
+            <li><strong>Keyboard Test:</strong> Press 'F' key to flip, 'Escape' to flip back</li>
+            <li><strong>Touch Test:</strong> On mobile, tap the card to flip it</li>
+            <li><strong>Monitor Status:</strong> Watch the status panel for detailed feedback</li>
+        </ol>
+    </div>
+    
+    <div class="test-controls">
+        <button onclick="testFlip()">🧪 Test Flip Function</button>
+        <button onclick="simulateKeypress('f')">⌨️ Simulate F Key</button>
+        <button onclick="simulateKeypress('Escape')">⏹️ Simulate Escape</button>
+        <button onclick="checkCardState()">📊 Check Card State</button>
+        <button onclick="clearLog()">🧹 Clear Log</button>
+        <button onclick="enableDebug()">🐛 Enable Debug</button>
+    </div>
+    
+    <div class="status">
+        <h3>📋 Test Status & Logs</h3>
+        <div id="logContainer"></div>
+    </div>
+    
+    <div class="main-card">
+        <iframe id="cardFrame" src="index.html"></iframe>
+    </div>
+    
+    <script>
+        let logContainer = document.getElementById('logContainer');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+        
+        function clearLog() {
+            logContainer.innerHTML = '';
+            log('Log cleared', 'info');
+        }
+        
+        function enableDebug() {
+            localStorage.setItem('debugFlip', 'true');
+            log('Debug mode enabled - reload the page to see debug output', 'warning');
+        }
+        
+        function getCardFrame() {
+            return document.getElementById('cardFrame');
+        }
+        
+        function testFlip() {
+            log('🔄 Testing card flip function...', 'info');
+            
+            const iframe = getCardFrame();
+            if (!iframe.contentWindow) {
+                log('❌ Cannot access iframe content', 'error');
+                return;
+            }
+            
+            try {
+                const win = iframe.contentWindow;
+                const doc = iframe.contentDocument;
+                
+                // Check if flipCard function exists
+                if (typeof win.flipCard !== 'function') {
+                    log('❌ flipCard function not found', 'error');
+                    return;
+                }
+                
+                // Check if devCardInstance exists
+                if (!win.devCardInstance) {
+                    log('❌ devCardInstance not found', 'error');
+                    return;
+                }
+                
+                // Get initial state
+                const initialState = win.devCardInstance.isFlipped;
+                log(`📊 Initial flip state: ${initialState}`, 'info');
+                
+                // Call flip function
+                win.flipCard();
+                log('✅ flipCard() function called', 'success');
+                
+                // Check result after animation delay
+                setTimeout(() => {
+                    const newState = win.devCardInstance.isFlipped;
+                    const card = doc.querySelector('.dev-card');
+                    const hasClass = card ? card.classList.contains('flipped') : false;
+                    
+                    log(`📊 New flip state: ${newState}`, 'info');
+                    log(`📊 Has 'flipped' CSS class: ${hasClass}`, 'info');
+                    
+                    if (newState !== initialState && ((newState && hasClass) || (!newState && !hasClass))) {
+                        log('✅ Flip test SUCCESSFUL!', 'success');
+                    } else {
+                        log('❌ Flip test FAILED!', 'error');
+                        log(`Expected state change: ${!initialState}, got: ${newState}`, 'error');
+                        log(`CSS class should be: ${newState}, is: ${hasClass}`, 'error');
+                    }
+                }, 700);
+                
+            } catch (error) {
+                log(`❌ Test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function simulateKeypress(key) {
+            log(`⌨️ Simulating ${key} keypress...`, 'info');
+            
+            const iframe = getCardFrame();
+            if (!iframe.contentDocument) {
+                log('❌ Cannot access iframe document', 'error');
+                return;
+            }
+            
+            try {
+                const keyEvent = new KeyboardEvent('keydown', {
+                    key: key,
+                    code: key === 'f' ? 'KeyF' : 'Escape',
+                    bubbles: true,
+                    cancelable: true
+                });
+                
+                iframe.contentDocument.dispatchEvent(keyEvent);
+                log(`✅ ${key} key event dispatched`, 'success');
+                
+            } catch (error) {
+                log(`❌ Keypress simulation error: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkCardState() {
+            log('📊 Checking card state...', 'info');
+            
+            const iframe = getCardFrame();
+            if (!iframe.contentWindow) {
+                log('❌ Cannot access iframe content', 'error');
+                return;
+            }
+            
+            try {
+                const win = iframe.contentWindow;
+                const doc = iframe.contentDocument;
+                const card = doc.querySelector('.dev-card');
+                
+                if (!card) {
+                    log('❌ Card element not found', 'error');
+                    return;
+                }
+                
+                // Check various states
+                const animationComplete = card.getAttribute('data-animation-complete');
+                const pointerEvents = getComputedStyle(card).pointerEvents;
+                const hasFlippedClass = card.classList.contains('flipped');
+                const isFlipping = card.classList.contains('flipping');
+                const flipInProgress = win.flipInProgress;
+                const devCardFlipState = win.devCardInstance ? win.devCardInstance.isFlipped : 'N/A';
+                
+                log(`🔍 Animation complete: ${animationComplete}`, 'info');
+                log(`🔍 Pointer events: ${pointerEvents}`, 'info');
+                log(`🔍 Has 'flipped' class: ${hasFlippedClass}`, 'info');
+                log(`🔍 Is flipping: ${isFlipping}`, 'info');
+                log(`🔍 Flip in progress: ${flipInProgress}`, 'info');
+                log(`🔍 DevCard flip state: ${devCardFlipState}`, 'info');
+                
+                // Check if GSAP is available
+                const hasGSAP = typeof win.gsap !== 'undefined';
+                log(`🔍 GSAP available: ${hasGSAP}`, 'info');
+                
+                // Overall status
+                if (animationComplete === 'true' && pointerEvents !== 'none') {
+                    log('✅ Card is ready for interaction!', 'success');
+                } else {
+                    log('⚠️ Card may not be ready for interaction', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ State check error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-check card state when iframe loads
+        document.getElementById('cardFrame').addEventListener('load', function() {
+            setTimeout(() => {
+                log('🚀 Iframe loaded, checking initial state...', 'info');
+                checkCardState();
+                
+                // Check again after GSAP animation should complete
+                setTimeout(() => {
+                    log('🔄 Rechecking state after animation delay...', 'info');
+                    checkCardState();
+                }, 4000);
+            }, 1000);
+        });
+        
+        // Initial message
+        log('🎯 Simple flip test initialized. Click "Test Flip Function" to start!', 'info');
+    </script>
+</body>
+</html>

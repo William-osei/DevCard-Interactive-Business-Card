@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Flip Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .test-output { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>DevCard Flip Function Test</h1>
+    <button onclick="runTest()">🧪 Run Test</button>
+    <div id="output"></div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = `test-output ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            output.appendChild(div);
+        }
+        
+        function runTest() {
+            document.getElementById('output').innerHTML = '';
+            log('🚀 Starting DevCard flip test...');
+            
+            // Check if we can access the main page
+            const testFrame = document.createElement('iframe');
+            testFrame.src = 'index.html';
+            testFrame.style.display = 'none';
+            document.body.appendChild(testFrame);
+            
+            testFrame.onload = function() {
+                log('✅ Main page loaded', 'success');
+                
+                setTimeout(() => {
+                    try {
+                        const win = testFrame.contentWindow;
+                        const doc = testFrame.contentDocument;
+                        
+                        // Test 1: Check if elements exist
+                        const card = doc.querySelector('.dev-card');
+                        if (card) {
+                            log('✅ Card element found', 'success');
+                        } else {
+                            log('❌ Card element NOT found', 'error');
+                            return;
+                        }
+                        
+                        // Test 2: Check if flipCard function exists
+                        if (typeof win.flipCard === 'function') {
+                            log('✅ flipCard function exists', 'success');
+                        } else {
+                            log('❌ flipCard function NOT found', 'error');
+                            return;
+                        }
+                        
+                        // Test 3: Check DevCard instance
+                        if (win.devCardInstance) {
+                            log('✅ devCardInstance exists', 'success');
+                            log(`Initial flip state: ${win.devCardInstance.isFlipped}`, 'info');
+                        } else {
+                            log('❌ devCardInstance NOT found', 'error');
+                            return;
+                        }
+                        
+                        // Test 4: Try to flip the card
+                        log('🔄 Attempting to flip card...', 'info');
+                        win.flipCard();
+                        
+                        setTimeout(() => {
+                            const hasFlippedClass = card.classList.contains('flipped');
+                            const instanceState = win.devCardInstance.isFlipped;
+                            
+                            log(`Card has 'flipped' class: ${hasFlippedClass}`, hasFlippedClass ? 'success' : 'error');
+                            log(`DevCard instance isFlipped: ${instanceState}`, instanceState ? 'success' : 'error');
+                            
+                            if (hasFlippedClass && instanceState) {
+                                log('✅ CARD FLIP SUCCESSFUL!', 'success');
+                                
+                                // Test flip back
+                                log('🔄 Testing flip back...', 'info');
+                                win.flipCard();
+                                
+                                setTimeout(() => {
+                                    const backToFront = !card.classList.contains('flipped');
+                                    log(`Card flipped back: ${backToFront}`, backToFront ? 'success' : 'error');
+                                }, 700);
+                                
+                            } else {
+                                log('❌ CARD FLIP FAILED!', 'error');
+                            }
+                        }, 700); // Wait for animation
+                        
+                    } catch (e) {
+                        log(`❌ Test error: ${e.message}`, 'error');
+                    }
+                }, 3000); // Wait for initialization
+            };
+            
+            testFrame.onerror = function() {
+                log('❌ Failed to load main page', 'error');
+            };
+        }
+    </script>
+</body>
+</html>
