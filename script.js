@@ -9,7 +9,9 @@ class TypingTest {
             "Programming is the art of telling another human being what one wants the computer to do. - Donald Knuth",
             "Code is like humor. When you have to explain it, it's bad. - Cory House",
             "First, solve the problem. Then, write the code. - John Johnson",
-            "Experience is the name everyone gives to their mistakes. - Oscar Wilde"
+            "Experience is the name everyone gives to their mistakes. - Oscar Wilde",
+            "JavaScript is the world's most misunderstood programming language. - Douglas Crockford",
+            "Any fool can write code that a computer can understand. Good programmers write code that humans can understand."
         ];
         this.currentText = '';
         this.startTime = 0;
@@ -20,15 +22,50 @@ class TypingTest {
         this.accuracy = 100;
         this.timeLeft = 60;
         this.timer = null;
+        this.inputListener = null;
+        this.setupGame();
+    }
+
+    setupGame() {
+        const startButton = document.getElementById('startTyping');
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                if (this.isActive) {
+                    this.reset();
+                } else {
+                    this.start();
+                }
+            });
+        }
     }
 
     start() {
+        // Clear any existing timer
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+        
+        // Remove existing input listener
+        const input = document.getElementById('typingInput');
+        if (this.inputListener && input) {
+            input.removeEventListener('input', this.inputListener);
+        }
+        
         this.currentText = this.texts[Math.floor(Math.random() * this.texts.length)];
-        document.getElementById('typingText').textContent = this.currentText;
-        document.getElementById('typingInput').disabled = false;
-        document.getElementById('typingInput').value = '';
-        document.getElementById('typingInput').focus();
-        document.getElementById('startTyping').textContent = 'Reset';
+        const typingTextEl = document.getElementById('typingText');
+        const typingInputEl = document.getElementById('typingInput');
+        const startButtonEl = document.getElementById('startTyping');
+        
+        if (!typingTextEl || !typingInputEl || !startButtonEl) {
+            console.error('Typing test elements not found');
+            return;
+        }
+        
+        typingTextEl.textContent = this.currentText;
+        typingInputEl.disabled = false;
+        typingInputEl.value = '';
+        typingInputEl.focus();
+        startButtonEl.textContent = 'Reset';
         
         this.startTime = Date.now();
         this.isActive = true;
@@ -36,16 +73,27 @@ class TypingTest {
         this.currentIndex = 0;
         this.timeLeft = 60;
         
+        // Update timer display
+        const timerEl = document.getElementById('timer');
+        if (timerEl) timerEl.textContent = this.timeLeft;
+        
         this.timer = setInterval(() => {
             this.timeLeft--;
-            document.getElementById('timer').textContent = this.timeLeft;
+            if (timerEl) timerEl.textContent = this.timeLeft;
             
             if (this.timeLeft <= 0) {
                 this.end();
             }
         }, 1000);
         
-        document.getElementById('typingInput').addEventListener('input', this.handleInput.bind(this));
+        // Add new input listener
+        this.inputListener = this.handleInput.bind(this);
+        typingInputEl.addEventListener('input', this.inputListener);
+    }
+
+    reset() {
+        this.end();
+        setTimeout(() => this.start(), 100);
     }
 
     handleInput(e) {
@@ -719,53 +767,135 @@ class DevCard {
         }
     }
 
-    loadProjects() {
+    async loadProjects() {
         const projectsGrid = document.getElementById('projectsGrid');
+        if (!projectsGrid) return;
         
-        // Default projects if GitHub API fails
+        // Show loading state
+        projectsGrid.innerHTML = `
+            <div class="projects-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading projects...</p>
+            </div>
+        `;
+        
+        // Enhanced default projects with better descriptions and links
         const defaultProjects = [
             {
-                name: 'Personal Portfolio',
-                description: 'A responsive portfolio website showcasing my skills and projects. Built with HTML, CSS, and JavaScript.',
+                name: 'DevCard - Interactive Business Card',
+                description: 'A cutting-edge interactive web-based business card featuring games, AI chat, analytics dashboard, and PWA support. Built with vanilla JavaScript, HTML5, and CSS3.',
+                html_url: 'https://github.com/William-osei/DevCard-Interactive-Business-Card',
+                language: 'JavaScript',
+                topics: ['business-card', 'interactive', 'pwa', 'web-development', 'games'],
+                stargazers_count: 0,
+                updated_at: new Date().toISOString()
+            },
+            {
+                name: 'Personal Portfolio Website',
+                description: 'A responsive portfolio website showcasing my skills, projects, and journey as a Computer Engineering student. Features modern design and smooth animations.',
                 html_url: 'https://github.com/William-osei/William-osei',
                 language: 'HTML',
-                topics: ['portfolio', 'responsive', 'css', 'javascript']
+                topics: ['portfolio', 'responsive', 'css3', 'javascript', 'web-design'],
+                stargazers_count: 0,
+                updated_at: '2024-01-15T00:00:00Z'
             },
             {
-                name: 'DevCard Interactive Business Card',
-                description: 'An interactive web-based business card for developers with theme switching and GitHub integration.',
-                html_url: '#',
-                language: 'JavaScript',
-                topics: ['business-card', 'interactive', 'web-development', 'portfolio']
-            },
-            {
-                name: 'Python Learning Projects',
-                description: 'Collection of Python exercises and small projects for learning programming fundamentals.',
-                html_url: '#',
+                name: 'Python Learning Journey',
+                description: 'A collection of Python exercises, algorithms, and small projects documenting my programming fundamentals learning journey at KNUST.',
+                html_url: 'https://github.com/William-osei/python-learning',
                 language: 'Python',
-                topics: ['python', 'learning', 'data-structures', 'algorithms']
+                topics: ['python', 'learning', 'algorithms', 'data-structures', 'education'],
+                stargazers_count: 0,
+                updated_at: '2023-12-01T00:00:00Z'
+            },
+            {
+                name: 'Web Calculator App',
+                description: 'A modern, responsive calculator application with scientific functions, theme switching, and keyboard support. Perfect for daily calculations.',
+                html_url: 'https://github.com/William-osei/calculator-app',
+                language: 'JavaScript',
+                topics: ['calculator', 'responsive', 'javascript', 'css3', 'math'],
+                stargazers_count: 0,
+                updated_at: '2023-11-20T00:00:00Z'
             }
         ];
 
-        const projectsToShow = this.userRepos && this.userRepos.length > 0 ? 
-            this.userRepos.slice(0, 3) : defaultProjects;
+        try {
+            // Try to use GitHub repos if available
+            let projectsToShow = defaultProjects;
+            
+            if (this.userRepos && this.userRepos.length > 0) {
+                // Enhance GitHub repos with fallback data
+                projectsToShow = this.userRepos.slice(0, 4).map((repo, index) => ({
+                    name: repo.name,
+                    description: repo.description || defaultProjects[index]?.description || 'A coding project to enhance my development skills.',
+                    html_url: repo.html_url,
+                    language: repo.language,
+                    topics: repo.topics || [],
+                    stargazers_count: repo.stargazers_count || 0,
+                    updated_at: repo.updated_at
+                }));
+            }
 
-        projectsGrid.innerHTML = projectsToShow.map(project => `
-            <div class="project-card" data-aos="fade-up" data-aos-delay="${Math.random() * 300}">
-                <h3>${project.name}</h3>
-                <p>${project.description || 'A coding project to enhance my development skills.'}</p>
-                <div class="project-tags">
-                    ${project.language ? `<span class="project-tag">${project.language}</span>` : ''}
-                    ${(project.topics || []).slice(0, 3).map(topic => 
-                        `<span class="project-tag">${topic}</span>`
-                    ).join('')}
+            // Render projects with enhanced styling
+            projectsGrid.innerHTML = projectsToShow.map((project, index) => {
+                const lastUpdate = new Date(project.updated_at).toLocaleDateString();
+                const isRecent = new Date(project.updated_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="${index * 100}">
+                        <div class="project-header">
+                            <h3>${project.name}</h3>
+                            ${isRecent ? '<span class="recent-badge">🔥 Recent</span>' : ''}
+                        </div>
+                        <p class="project-description">${project.description}</p>
+                        <div class="project-meta">
+                            <div class="project-tags">
+                                ${project.language ? `<span class="project-tag language-tag">${project.language}</span>` : ''}
+                                ${(project.topics || []).slice(0, 3).map(topic => 
+                                    `<span class="project-tag topic-tag">${topic}</span>`
+                                ).join('')}
+                            </div>
+                            <div class="project-stats">
+                                ${project.stargazers_count !== undefined ? `<span class="stars">⭐ ${project.stargazers_count}</span>` : ''}
+                                <span class="updated">📅 ${lastUpdate}</span>
+                            </div>
+                        </div>
+                        <div class="project-actions">
+                            <a href="${project.html_url}" target="_blank" class="project-link primary">
+                                <i class="fab fa-github"></i>
+                                View Code
+                            </a>
+                            ${project.homepage ? `
+                                <a href="${project.homepage}" target="_blank" class="project-link secondary">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Live Demo
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            // Fallback to default projects on error
+            projectsGrid.innerHTML = defaultProjects.slice(0, 3).map((project, index) => `
+                <div class="project-card" data-aos="fade-up" data-aos-delay="${index * 100}">
+                    <h3>${project.name}</h3>
+                    <p>${project.description}</p>
+                    <div class="project-tags">
+                        ${project.language ? `<span class="project-tag">${project.language}</span>` : ''}
+                        ${(project.topics || []).slice(0, 3).map(topic => 
+                            `<span class="project-tag">${topic}</span>`
+                        ).join('')}
+                    </div>
+                    <a href="${project.html_url}" target="_blank" class="project-link">
+                        <i class="fab fa-github"></i>
+                        View Project
+                    </a>
                 </div>
-                <a href="${project.html_url}" target="_blank" class="project-link">
-                    <i class="fab fa-github"></i>
-                    View Project
-                </a>
-            </div>
-        `).join('');
+            `).join('');
+        }
     }
 
     generateQRCode() {
