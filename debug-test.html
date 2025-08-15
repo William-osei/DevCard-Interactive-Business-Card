@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Card Flip</title>
+</head>
+<body>
+    <h1>Debug Card Flip Functionality</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const p = document.createElement('p');
+            p.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(p);
+        }
+        
+        // Test if the main page loads
+        log('Starting debug tests...');
+        
+        // Create iframe to test main page
+        const iframe = document.createElement('iframe');
+        iframe.src = 'index.html';
+        iframe.width = '800';
+        iframe.height = '600';
+        iframe.style.border = '1px solid #ccc';
+        iframe.style.marginTop = '20px';
+        
+        iframe.onload = function() {
+            log('Main page loaded successfully', 'success');
+            
+            setTimeout(() => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const card = iframeDoc.querySelector('.dev-card');
+                    const flipButton = iframeDoc.querySelector('.btn.primary');
+                    
+                    if (!card) {
+                        log('ERROR: .dev-card element not found', 'error');
+                    } else {
+                        log('✓ .dev-card element found', 'success');
+                    }
+                    
+                    if (!flipButton) {
+                        log('ERROR: Flip button not found', 'error');
+                    } else {
+                        log('✓ Flip button found', 'success');
+                    }
+                    
+                    // Check if flipCard function exists
+                    if (typeof iframe.contentWindow.flipCard === 'function') {
+                        log('✓ flipCard function is defined', 'success');
+                        
+                        // Try to call flipCard
+                        try {
+                            iframe.contentWindow.flipCard();
+                            log('✓ flipCard function called successfully', 'success');
+                            
+                            setTimeout(() => {
+                                const isFlipped = card.classList.contains('flipped');
+                                log(`Card flip state: ${isFlipped ? 'FLIPPED' : 'NOT FLIPPED'}`, isFlipped ? 'success' : 'error');
+                            }, 100);
+                            
+                        } catch (e) {
+                            log(`ERROR calling flipCard: ${e.message}`, 'error');
+                        }
+                    } else {
+                        log('ERROR: flipCard function not defined', 'error');
+                    }
+                    
+                    // Check DevCard instance
+                    if (iframe.contentWindow.devCardInstance) {
+                        log('✓ devCardInstance exists', 'success');
+                    } else {
+                        log('ERROR: devCardInstance not found', 'error');
+                    }
+                    
+                } catch (e) {
+                    log(`ERROR accessing iframe content: ${e.message}`, 'error');
+                }
+            }, 3000); // Wait for everything to initialize
+        };
+        
+        iframe.onerror = function() {
+            log('ERROR: Main page failed to load', 'error');
+        };
+        
+        document.body.appendChild(iframe);
+    </script>
+</body>
+</html>

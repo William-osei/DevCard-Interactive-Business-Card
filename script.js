@@ -699,6 +699,19 @@ class DevCard {
         this.loadProjects();
         this.generateQRCode();
         this.animateSkillBars();
+        this.ensureCardInteractivity();
+    }
+    
+    ensureCardInteractivity() {
+        // Fallback to ensure card is always interactive
+        setTimeout(() => {
+            const card = document.querySelector('.dev-card');
+            if (card && !card.getAttribute('data-animation-complete')) {
+                console.warn('⚠️ Animation timeout - ensuring card is interactive');
+                card.style.pointerEvents = 'auto';
+                card.setAttribute('data-animation-complete', 'true');
+            }
+        }, 5000); // 5-second safety timeout
     }
 
     initializeCardAccessibility() {
@@ -1155,6 +1168,25 @@ function flipCard() {
         return;
     }
     
+    // Check if card is still in initial GSAP animation
+    if (typeof gsap !== 'undefined' && !card.getAttribute('data-animation-complete')) {
+        console.warn('Card flip: Waiting for initial animation to complete');
+        window.flipInProgress = false;
+        // Show user feedback
+        if (devCardInstance) {
+            devCardInstance.showNotification('⏳ Loading animation in progress...', 'info');
+        }
+        return;
+    }
+    
+    // Stop any ongoing GSAP animations on the card
+    if (typeof gsap !== 'undefined') {
+        gsap.killTweensOf(card);
+        gsap.killTweensOf(cardContainer);
+        // Ensure the card is at its final state
+        gsap.set(card, { scale: 1, opacity: 1 });
+    }
+    
     // Add flipping class for animation state
     card.classList.add('flipping');
     
@@ -1169,7 +1201,7 @@ function flipCard() {
     
     // Add enhanced visual feedback with smooth scaling
     if (typeof gsap !== 'undefined') {
-        // Use GSAP for smoother animations
+        // Use GSAP for smoother animations with better conflict handling
         gsap.to(cardContainer, {
             scale: 0.95,
             duration: 0.1,
@@ -1746,9 +1778,37 @@ document.addEventListener('DOMContentLoaded', () => {
             scale: 0.8,
             opacity: 0,
             ease: 'back.out(1.7)',
-            delay: 2.2
+            delay: 2.2,
+            onComplete: () => {
+                // Ensure card is fully interactive after animation
+                const card = document.querySelector('.dev-card');
+                if (card) {
+                    card.style.pointerEvents = 'auto';
+                    card.setAttribute('data-animation-complete', 'true');
+                    console.log('✅ Card animation complete - ready for interaction');
+                    // Show subtle visual feedback that the card is ready
+                    if (devCardInstance) {
+                        setTimeout(() => {
+                            devCardInstance.showNotification('💳 Card ready! Try flipping with F key or click Contact Me!', 'success');
+                        }, 500);
+                    }
+                }
+            }
         });
-        
+    } else {
+        // Fallback: Make card interactive immediately if GSAP is not available
+        setTimeout(() => {
+            const card = document.querySelector('.dev-card');
+            if (card) {
+                card.style.pointerEvents = 'auto';
+                card.setAttribute('data-animation-complete', 'true');
+                console.log('✅ Card ready for interaction (no GSAP)');
+            }
+        }, 100);
+    }
+    
+    // Continue with other GSAP animations if available
+    if (typeof gsap !== 'undefined') {
         gsap.from('.analytics-dashboard', {
             duration: 1,
             y: 50,

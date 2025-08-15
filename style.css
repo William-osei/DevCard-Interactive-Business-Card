@@ -100,6 +100,35 @@ body {
     will-change: transform;
     /* Ensure proper layer positioning */
     transform-origin: center center;
+    /* Initially disable pointer events during loading animation */
+    pointer-events: none;
+}
+
+/* Enable interactions after initial animation */
+.dev-card[data-animation-complete="true"] {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Add a subtle pulse effect when card becomes interactive */
+.dev-card[data-animation-complete="true"]::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid var(--primary-color);
+    border-radius: 22px;
+    opacity: 0;
+    pointer-events: none;
+    animation: cardReady 2s ease-out;
+}
+
+@keyframes cardReady {
+    0% { opacity: 0; transform: scale(0.95); }
+    50% { opacity: 0.5; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1); }
 }
 
 .dev-card.flipped {

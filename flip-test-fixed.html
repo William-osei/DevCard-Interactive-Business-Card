@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Card Flip Test</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: Arial, sans-serif; 
+            background: #f0f2f5;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .status-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .iframe-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        iframe {
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: white;
+        }
+        
+        .test-instructions {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-instructions h3 {
+            margin-top: 0;
+        }
+        
+        .test-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🔄 Fixed Card Flip Functionality Test</h1>
+        <p>Testing the improved card flip feature with animation handling and timing fixes</p>
+    </div>
+    
+    <div class="test-instructions">
+        <h3>📋 Test Instructions:</h3>
+        <div class="test-checklist">
+            <div class="checklist-item">
+                <strong>🖱️ Mouse Tests:</strong>
+                <ul>
+                    <li>Click "Contact Me" button to flip</li>
+                    <li>Click "Back to Profile" to flip back</li>
+                    <li>Verify smooth animations</li>
+                </ul>
+            </div>
+            <div class="checklist-item">
+                <strong>⌨️ Keyboard Tests:</strong>
+                <ul>
+                    <li>Press 'F' key to flip</li>
+                    <li>Press 'Escape' to flip back</li>
+                    <li>Test when card is focused</li>
+                </ul>
+            </div>
+            <div class="checklist-item">
+                <strong>📱 Touch Tests:</strong>
+                <ul>
+                    <li>Tap the card to flip</li>
+                    <li>Test on mobile devices</li>
+                    <li>Verify haptic feedback</li>
+                </ul>
+            </div>
+            <div class="checklist-item">
+                <strong>⚡ Animation Tests:</strong>
+                <ul>
+                    <li>Wait for loading animation</li>
+                    <li>Look for blue pulse effect</li>
+                    <li>Test timing and responsiveness</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-controls">
+        <button onclick="runAutomatedTest()">🧪 Run Automated Test</button>
+        <button onclick="testKeyboardShortcuts()">⌨️ Test Keyboard</button>
+        <button onclick="testMobileFeatures()">📱 Test Mobile</button>
+        <button onclick="resetTest()">🔄 Reset</button>
+        <button onclick="openFullScreen()">🖥️ Full Screen</button>
+    </div>
+    
+    <div class="status-panel">
+        <h3>📊 Test Results</h3>
+        <div id="testResults"></div>
+    </div>
+    
+    <div class="iframe-container">
+        <iframe id="testFrame" src="index.html" width="900" height="700" title="DevCard Test"></iframe>
+    </div>
+    
+    <!-- Debug script for enhanced testing -->
+    <script src="debug-flip.js"></script>
+    
+    <script>
+        let testResults = [];
+        
+        function logResult(message, type = 'info', timestamp = true) {
+            const resultsDiv = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            const time = timestamp ? `[${new Date().toLocaleTimeString()}] ` : '';
+            div.innerHTML = `${time}<strong>${message}</strong>`;
+            resultsDiv.appendChild(div);
+            testResults.push({ message, type, timestamp: new Date() });
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            testResults = [];
+        }
+        
+        async function runAutomatedTest() {
+            clearResults();
+            logResult('🚀 Starting automated flip test...', 'info');
+            
+            const iframe = document.getElementById('testFrame');
+            
+            try {
+                // Wait for iframe to be ready
+                await new Promise(resolve => {
+                    if (iframe.contentDocument?.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        iframe.onload = resolve;
+                    }
+                });
+                
+                logResult('✅ Iframe loaded successfully', 'success');
+                
+                const win = iframe.contentWindow;
+                const doc = iframe.contentDocument;
+                
+                // Test 1: Check elements
+                const card = doc.querySelector('.dev-card');
+                if (!card) {
+                    logResult('❌ Card element not found', 'error');
+                    return;
+                }
+                logResult('✅ Card element found', 'success');
+                
+                // Test 2: Check flipCard function
+                if (typeof win.flipCard !== 'function') {
+                    logResult('❌ flipCard function not found', 'error');
+                    return;
+                }
+                logResult('✅ flipCard function exists', 'success');
+                
+                // Test 3: Check devCardInstance
+                if (!win.devCardInstance) {
+                    logResult('❌ devCardInstance not found', 'error');
+                    return;
+                }
+                logResult('✅ devCardInstance exists', 'success');
+                
+                // Test 4: Wait for animation to complete
+                logResult('⏳ Waiting for initial animation to complete...', 'warning');
+                
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                while (attempts < maxAttempts) {
+                    if (card.getAttribute('data-animation-complete') === 'true') {
+                        logResult('✅ Initial animation completed', 'success');
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (attempts >= maxAttempts) {
+                    logResult('⚠️ Animation completion timeout - testing anyway', 'warning');
+                }
+                
+                // Test 5: Attempt card flip
+                logResult('🔄 Testing card flip...', 'info');
+                const initialFlipState = win.devCardInstance.isFlipped;
+                
+                win.flipCard();
+                
+                // Wait for flip animation
+                await new Promise(resolve => setTimeout(resolve, 700));
+                
+                const newFlipState = win.devCardInstance.isFlipped;
+                const hasFlippedClass = card.classList.contains('flipped');
+                
+                if (newFlipState !== initialFlipState && hasFlippedClass) {
+                    logResult('✅ Card flip SUCCESSFUL!', 'success');
+                    
+                    // Test flip back
+                    logResult('🔄 Testing flip back...', 'info');
+                    win.flipCard();
+                    
+                    await new Promise(resolve => setTimeout(resolve, 700));
+                    
+                    if (win.devCardInstance.isFlipped === initialFlipState) {
+                        logResult('✅ Card flip back SUCCESSFUL!', 'success');
+                        logResult('🎉 All tests PASSED!', 'success');
+                    } else {
+                        logResult('❌ Card flip back FAILED', 'error');
+                    }
+                } else {
+                    logResult('❌ Card flip FAILED', 'error');
+                    logResult(`Flip state changed: ${newFlipState !== initialFlipState}`, 'info');
+                    logResult(`Has flipped class: ${hasFlippedClass}`, 'info');
+                }
+                
+            } catch (error) {
+                logResult(`❌ Test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testKeyboardShortcuts() {
+            logResult('⌨️ Testing keyboard shortcuts...', 'info');
+            const iframe = document.getElementById('testFrame');
+            
+            try {
+                const win = iframe.contentWindow;
+                const doc = iframe.contentDocument;
+                
+                // Simulate F key press
+                const fKeyEvent = new KeyboardEvent('keydown', {
+                    key: 'f',
+                    code: 'KeyF',
+                    bubbles: true
+                });
+                
+                doc.dispatchEvent(fKeyEvent);
+                logResult('✅ F key event dispatched', 'success');
+                
+                setTimeout(() => {
+                    // Test Escape key
+                    const escapeKeyEvent = new KeyboardEvent('keydown', {
+                        key: 'Escape',
+                        code: 'Escape',
+                        bubbles: true
+                    });
+                    
+                    doc.dispatchEvent(escapeKeyEvent);
+                    logResult('✅ Escape key event dispatched', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                logResult(`❌ Keyboard test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testMobileFeatures() {
+            logResult('📱 Testing mobile features...', 'info');
+            const iframe = document.getElementById('testFrame');
+            
+            try {
+                const win = iframe.contentWindow;
+                const doc = iframe.contentDocument;
+                const card = doc.querySelector('.dev-card');
+                
+                if (card) {
+                    // Simulate touch events
+                    const touchStart = new TouchEvent('touchstart', {
+                        bubbles: true,
+                        touches: [{
+                            clientX: 200,
+                            clientY: 300,
+                            target: card
+                        }]
+                    });
+                    
+                    const touchEnd = new TouchEvent('touchend', {
+                        bubbles: true,
+                        changedTouches: [{
+                            clientX: 200,
+                            clientY: 300,
+                            target: card
+                        }]
+                    });
+                    
+                    card.dispatchEvent(touchStart);
+                    setTimeout(() => {
+                        card.dispatchEvent(touchEnd);
+                        logResult('✅ Touch events dispatched', 'success');
+                    }, 100);
+                } else {
+                    logResult('❌ Card element not found for touch test', 'error');
+                }
+                
+            } catch (error) {
+                logResult(`❌ Mobile test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function resetTest() {
+            logResult('🔄 Resetting test...', 'info');
+            document.getElementById('testFrame').src = 'index.html';
+            setTimeout(() => {
+                logResult('✅ Test reset complete', 'success');
+            }, 1000);
+        }
+        
+        function openFullScreen() {
+            window.open('index.html', '_blank', 'fullscreen=yes');
+            logResult('🖥️ Opened in full screen', 'info');
+        }
+        
+        // Auto-start test after page loads
+        setTimeout(() => {
+            logResult('🎯 Ready for testing! Click "Run Automated Test" to begin.', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>
