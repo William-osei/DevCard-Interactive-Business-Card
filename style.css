@@ -96,21 +96,40 @@ body {
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+    /* Add will-change for better performance */
+    will-change: transform;
+    /* Ensure proper layer positioning */
+    transform-origin: center center;
 }
 
 .dev-card.flipped {
     transform: rotateY(180deg);
 }
 
-/* Card flip hover effect */
-.dev-card:hover {
-    transform: scale(1.02);
+/* Enhanced card flip hover effect with better mobile support */
+.dev-card:hover:not(.flipped) {
+    transform: scale(1.02) rotateY(0deg);
     box-shadow: 0 25px 50px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dev-card.flipped:hover {
     transform: rotateY(180deg) scale(1.02);
     box-shadow: 0 25px 50px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Add touch device support */
+@media (hover: none) and (pointer: coarse) {
+    .dev-card:hover,
+    .dev-card.flipped:hover {
+        transform: none;
+        box-shadow: 0 20px 40px var(--shadow-color);
+    }
+    
+    .dev-card.flipped:hover {
+        transform: rotateY(180deg);
+    }
 }
 
 .card-front,
@@ -126,10 +145,49 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* Improve rendering performance */
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    /* Add smooth transitions for content */
+    transition: opacity 0.3s ease;
 }
 
 .card-back {
     transform: rotateY(180deg);
+}
+
+/* Add flip animation states for better visual feedback */
+.dev-card.flipping {
+    pointer-events: none; /* Prevent multiple clicks during animation */
+}
+
+.dev-card.flipping .card-front,
+.dev-card.flipping .card-back {
+    transition: opacity 0.2s ease;
+}
+
+/* Accessibility improvements */
+.dev-card:focus-within {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .dev-card {
+        transition: transform 0.3s ease;
+    }
+    
+    .dev-card:hover,
+    .dev-card.flipped:hover {
+        transform: none;
+        box-shadow: 0 25px 50px var(--shadow-color);
+    }
+    
+    .dev-card.flipped:hover {
+        transform: rotateY(180deg);
+    }
 }
 
 /* Profile Section */
@@ -1511,6 +1569,65 @@ body {
 }
 
 @media (max-width: 480px) {
+    /* Mobile card flip optimizations */
+    .card-container {
+        padding: 10px;
+        min-height: 100vh;
+    }
+    
+    .dev-card {
+        width: min(380px, calc(100vw - 20px));
+        height: min(550px, 80vh);
+        margin: 0 auto;
+    }
+    
+    .card-front,
+    .card-back {
+        padding: 20px;
+        font-size: 0.9rem;
+    }
+    
+    /* Ensure flip works well on mobile */
+    .dev-card.flipped {
+        transform: rotateY(180deg);
+    }
+    
+    /* Optimize text sizes for mobile flip */
+    .name {
+        font-size: 1.5rem;
+    }
+    
+    .title {
+        font-size: 1rem;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .skill-item {
+        padding: 8px 12px;
+    }
+    
+    .skill-item span {
+        font-size: 0.8rem;
+    }
+    
+    .contact-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .message-form {
+        gap: 15px;
+    }
+    
+    .message-form input,
+    .message-form textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
     .chart-container,
     .game-card {
         padding: 15px;
@@ -1529,5 +1646,42 @@ body {
         flex-direction: column;
         gap: 10px;
         text-align: center;
+    }
+    
+    /* Improve touch targets on mobile */
+    .btn {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+    
+    .action-buttons {
+        gap: 15px;
+        margin-top: 20px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .dev-card {
+        width: calc(100vw - 40px);
+        height: min(500px, 75vh);
+    }
+    
+    .card-front,
+    .card-back {
+        padding: 15px;
+    }
+    
+    .avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .name {
+        font-size: 1.3rem;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
     }
 }

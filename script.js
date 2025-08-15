@@ -693,11 +693,51 @@ class DevCard {
 
     init() {
         this.setTheme(this.currentTheme);
+        this.initializeCardAccessibility();
         this.bindEvents();
         this.fetchGitHubData();
         this.loadProjects();
         this.generateQRCode();
         this.animateSkillBars();
+    }
+
+    initializeCardAccessibility() {
+        const card = document.querySelector('.dev-card');
+        if (card) {
+            // Make card focusable and add accessibility attributes
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', 'Interactive business card. Press F to flip or Enter to interact');
+            card.setAttribute('aria-expanded', 'false');
+            
+            // Add touch-friendly flip on mobile
+            card.addEventListener('touchstart', this.handleTouch.bind(this));
+            card.addEventListener('touchend', this.handleTouchEnd.bind(this));
+        }
+        
+        // Set up contact form accessibility
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    handleTouch(e) {
+        this.touchStartTime = Date.now();
+        this.touchStartY = e.touches[0].clientY;
+    }
+
+    handleTouchEnd(e) {
+        const touchEndTime = Date.now();
+        const touchDuration = touchEndTime - this.touchStartTime;
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchDistance = Math.abs(touchEndY - this.touchStartY);
+        
+        // If it's a tap (short duration, minimal movement), flip the card
+        if (touchDuration < 300 && touchDistance < 10) {
+            e.preventDefault();
+            flipCard();
+        }
     }
 
     bindEvents() {
@@ -1055,92 +1095,267 @@ class DevCard {
     }
 
     handleKeyboardNavigation(e) {
+        // Don't interfere with form inputs
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
         // Press 'F' to flip card
         if (e.key.toLowerCase() === 'f') {
+            e.preventDefault();
             flipCard();
         }
         
         // Press 'T' to toggle theme
         if (e.key.toLowerCase() === 't') {
+            e.preventDefault();
             this.toggleTheme();
         }
         
         // Press 'S' to share card
         if (e.key.toLowerCase() === 's') {
+            e.preventDefault();
             shareCard();
+        }
+        
+        // Press 'Escape' to flip back to front if on back
+        if (e.key === 'Escape' && this.isFlipped) {
+            e.preventDefault();
+            flipCard();
+        }
+        
+        // Press 'Enter' or 'Space' when card is focused to flip
+        if ((e.key === 'Enter' || e.key === ' ') && document.activeElement.classList.contains('dev-card')) {
+            e.preventDefault();
+            flipCard();
         }
     }
 }
 
 // Global functions for HTML onclick events
 function flipCard() {
+    // Prevent multiple rapid flips
+    if (window.flipInProgress) return;
+    window.flipInProgress = true;
+    
     const card = document.querySelector('.dev-card');
     const cardContainer = document.querySelector('.card-container');
     
-    // Add flip animation effect
+    // Check if required elements exist
+    if (!card || !cardContainer) {
+        console.error('Card flip: Required elements not found');
+        window.flipInProgress = false;
+        return;
+    }
+    
+    // Ensure devCardInstance exists
+    if (!devCardInstance) {
+        console.error('Card flip: DevCard instance not found');
+        window.flipInProgress = false;
+        return;
+    }
+    
+    // Add flipping class for animation state
+    card.classList.add('flipping');
+    
+    // Add flip animation effect with enhanced visual feedback
     card.classList.toggle('flipped');
     devCardInstance.isFlipped = !devCardInstance.isFlipped;
     
-    // Add visual feedback
-    cardContainer.style.transform = 'scale(0.98)';
+    // Remove flipping class after animation
     setTimeout(() => {
-        cardContainer.style.transform = '';
-    }, 150);
+        card.classList.remove('flipping');
+    }, 650);
     
-    // Update button text based on card state
+    // Add enhanced visual feedback with smooth scaling
+    if (typeof gsap !== 'undefined') {
+        // Use GSAP for smoother animations
+        gsap.to(cardContainer, {
+            scale: 0.95,
+            duration: 0.1,
+            ease: "power2.out",
+            onComplete: () => {
+                gsap.to(cardContainer, {
+                    scale: 1,
+                    duration: 0.2,
+                    ease: "back.out(1.7)"
+                });
+            }
+        });
+    } else {
+        // Fallback to CSS transitions
+        cardContainer.style.transition = 'transform 0.15s ease-out';
+        cardContainer.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            cardContainer.style.transform = 'scale(1)';
+            setTimeout(() => {
+                cardContainer.style.transition = '';
+            }, 200);
+        }, 150);
+    }
+    
+    // Update button text and accessibility attributes
     const contactBtn = card.querySelector('.btn.primary');
     const backBtn = card.querySelector('.back-button');
     
     if (devCardInstance.isFlipped) {
         // Card is now showing back (contact side)
-        if (contactBtn) contactBtn.textContent = 'Back to Profile';
+        if (contactBtn) {
+            contactBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Profile';
+            contactBtn.setAttribute('aria-label', 'Go back to profile view');
+        }
+        
+        // Update card accessibility
+        card.setAttribute('aria-label', 'Contact information view - Press F or Escape to go back');
+        card.setAttribute('aria-expanded', 'true');
+        
+        // Update contact form accessibility
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.setAttribute('aria-hidden', 'false');
+        }
+        
         // Show notification
         if (devCardInstance) {
             devCardInstance.showNotification('💼 Contact information displayed!', 'info');
         }
-        // Focus on the first input field
+        
+        // Focus on the first input field after flip animation completes
         setTimeout(() => {
             const firstInput = document.getElementById('senderName');
-            if (firstInput) firstInput.focus();
-        }, 300);
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.setAttribute('tabindex', '1');
+            }
+            // Set up better tab order for contact form
+            setupContactFormTabbing();
+        }, 600); // Wait for flip animation to complete
     } else {
         // Card is now showing front (profile side)
         if (contactBtn) {
             contactBtn.innerHTML = '<i class="fas fa-envelope"></i> Contact Me';
+            contactBtn.setAttribute('aria-label', 'View contact information');
         }
+        
+        // Update card accessibility
+        card.setAttribute('aria-label', 'Profile information view - Press F to view contact information');
+        card.setAttribute('aria-expanded', 'false');
+        
+        // Update contact form accessibility
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.setAttribute('aria-hidden', 'true');
+        }
+        
         if (devCardInstance) {
             devCardInstance.showNotification('👨‍💻 Profile view restored!', 'info');
         }
+        
+        // Clear contact form tab indices
+        clearContactFormTabbing();
     }
     
-// Play flip sound effect (if available)
+    // Play flip sound effect (if available)
     playFlipSound();
+    
+    // Add haptic feedback for mobile devices
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // Short vibration
+    }
+    
+    // Allow next flip after animation completes
+    setTimeout(() => {
+        window.flipInProgress = false;
+    }, 650);
+}
+
+// Helper function to setup proper tabbing for contact form
+function setupContactFormTabbing() {
+    const formElements = [
+        document.getElementById('senderName'),
+        document.getElementById('senderEmail'),
+        document.getElementById('message'),
+        document.querySelector('#contactForm button[type="submit"]'),
+        document.querySelector('.back-button')
+    ];
+    
+    formElements.forEach((element, index) => {
+        if (element) {
+            element.setAttribute('tabindex', index + 1);
+        }
+    });
+}
+
+// Helper function to clear contact form tabbing
+function clearContactFormTabbing() {
+    const formElements = [
+        document.getElementById('senderName'),
+        document.getElementById('senderEmail'),
+        document.getElementById('message'),
+        document.querySelector('#contactForm button[type="submit"]'),
+        document.querySelector('.back-button')
+    ];
+    
+    formElements.forEach(element => {
+        if (element) {
+            element.removeAttribute('tabindex');
+        }
+    });
 }
 
 // Sound effect function
 function playFlipSound() {
+    // Check if user has enabled sound (respect user preferences)
+    const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    if (!soundEnabled) return;
+    
     // Create a subtle flip sound using Web Audio API
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Use existing audio context if available
+        if (!window.audioContext) {
+            window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        const audioContext = window.audioContext;
+        
+        // Resume audio context if it's suspended (required by some browsers)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
+        const filterNode = audioContext.createBiquadFilter();
         
-        oscillator.connect(gainNode);
+        // Connect the audio nodes
+        oscillator.connect(filterNode);
+        filterNode.connect(gainNode);
         gainNode.connect(audioContext.destination);
         
-        // Create a short "whoosh" sound
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.1);
+        // Configure the filter for a smoother sound
+        filterNode.type = 'lowpass';
+        filterNode.frequency.setValueAtTime(1000, audioContext.currentTime);
         
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.15);
+        // Create an enhanced "whoosh" sound
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.12);
         
-        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.18);
+        
+        oscillator.type = 'triangle';
         oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.15);
+        oscillator.stop(audioContext.currentTime + 0.18);
+        
+        // Clean up oscillator after it finishes
+        oscillator.onended = () => {
+            oscillator.disconnect();
+            gainNode.disconnect();
+            filterNode.disconnect();
+        };
     } catch (error) {
-        // Silently fail if Web Audio API is not supported
-        console.log('Web Audio API not supported');
+        // Silently fail if Web Audio API is not supported or fails
+        console.log('Audio playback not available:', error.message);
     }
 }
 
