@@ -371,6 +371,169 @@ class AIChat {
     }
 }
 
+class APIs {
+    constructor() {
+        this.spotify = null;
+        this.weather = null;
+        this.githubContributions = null;
+        this.setupAPIs();
+    }
+
+    async setupAPIs() {
+        await this.loadWeatherData();
+        await this.loadGitHubContributions();
+        this.setupSpotifyWidget();
+    }
+
+    async loadWeatherData() {
+        try {
+            // Using a free weather API (OpenWeatherMap requires API key in production)
+            // For demo purposes, we'll use mock data
+            const mockWeatherData = {
+                location: 'Kumasi, Ghana',
+                temperature: 28,
+                condition: 'Partly Cloudy',
+                humidity: 65,
+                icon: '⛅'
+            };
+            
+            this.weather = mockWeatherData;
+            this.displayWeather();
+        } catch (error) {
+            console.error('Weather API error:', error);
+            this.displayWeatherError();
+        }
+    }
+
+    displayWeather() {
+        const weatherWidget = document.getElementById('weatherWidget');
+        if (weatherWidget && this.weather) {
+            weatherWidget.innerHTML = `
+                <div class="weather-info">
+                    <span class="weather-icon">${this.weather.icon}</span>
+                    <div class="weather-details">
+                        <div class="weather-temp">${this.weather.temperature}°C</div>
+                        <div class="weather-location">${this.weather.location}</div>
+                        <div class="weather-condition">${this.weather.condition}</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    displayWeatherError() {
+        const weatherWidget = document.getElementById('weatherWidget');
+        if (weatherWidget) {
+            weatherWidget.innerHTML = `
+                <div class="weather-error">
+                    <i class="fas fa-cloud-rain"></i>
+                    <span>Weather unavailable</span>
+                </div>
+            `;
+        }
+    }
+
+    async loadGitHubContributions() {
+        try {
+            // Mock GitHub contributions data (in production, use GitHub GraphQL API)
+            const mockContributions = {
+                totalContributions: 247,
+                weeks: this.generateMockContributions()
+            };
+            
+            this.githubContributions = mockContributions;
+            this.displayGitHubHeatmap();
+        } catch (error) {
+            console.error('GitHub contributions error:', error);
+        }
+    }
+
+    generateMockContributions() {
+        const weeks = [];
+        for (let week = 0; week < 52; week++) {
+            const weekData = [];
+            for (let day = 0; day < 7; day++) {
+                weekData.push({
+                    count: Math.floor(Math.random() * 5),
+                    date: new Date(2024, 0, week * 7 + day).toISOString().split('T')[0]
+                });
+            }
+            weeks.push(weekData);
+        }
+        return weeks;
+    }
+
+    displayGitHubHeatmap() {
+        const heatmapContainer = document.getElementById('githubHeatmap');
+        if (!heatmapContainer || !this.githubContributions) return;
+
+        let heatmapHTML = '<div class="heatmap-title">GitHub Contributions</div>';
+        heatmapHTML += '<div class="heatmap-grid">';
+        
+        this.githubContributions.weeks.forEach(week => {
+            week.forEach(day => {
+                const intensity = day.count === 0 ? 0 : Math.min(4, day.count);
+                heatmapHTML += `<div class="heatmap-day" data-count="${day.count}" data-level="${intensity}" title="${day.count} contributions on ${day.date}"></div>`;
+            });
+        });
+        
+        heatmapHTML += '</div>';
+        heatmapHTML += `<div class="heatmap-summary">Total: ${this.githubContributions.totalContributions} contributions this year</div>`;
+        
+        heatmapContainer.innerHTML = heatmapHTML;
+    }
+
+    setupSpotifyWidget() {
+        // Mock Spotify currently playing data
+        const mockSpotifyData = {
+            isPlaying: true,
+            track: 'Coding in the Dark',
+            artist: 'Dev Beats',
+            album: 'Programming Playlist',
+            progress: 45,
+            duration: 180
+        };
+        
+        this.displaySpotifyWidget(mockSpotifyData);
+    }
+
+    displaySpotifyWidget(data) {
+        const spotifyWidget = document.getElementById('spotifyWidget');
+        if (!spotifyWidget) return;
+
+        if (data.isPlaying) {
+            spotifyWidget.innerHTML = `
+                <div class="spotify-playing">
+                    <i class="fab fa-spotify"></i>
+                    <div class="spotify-info">
+                        <div class="spotify-track">${data.track}</div>
+                        <div class="spotify-artist">by ${data.artist}</div>
+                        <div class="spotify-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(data.progress / data.duration) * 100}%"></div>
+                            </div>
+                            <span class="time">${this.formatTime(data.progress)} / ${this.formatTime(data.duration)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            spotifyWidget.innerHTML = `
+                <div class="spotify-idle">
+                    <i class="fab fa-spotify"></i>
+                    <span>Not currently playing</span>
+                </div>
+            `;
+        }
+    }
+
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+}
+
 class Analytics {
     constructor() {
         this.charts = {};
@@ -992,9 +1155,109 @@ function hideLoadingScreen() {
     }, 2000); // Show loading for 2 seconds
 }
 
+// PWA Installation
+class PWAInstaller {
+    constructor() {
+        this.deferredPrompt = null;
+        this.setupPWA();
+    }
+
+    setupPWA() {
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('🔥 Service Worker registered:', registration.scope);
+                    this.showInstallPrompt();
+                })
+                .catch((error) => {
+                    console.log('❌ Service Worker registration failed:', error);
+                });
+        }
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+            this.showInstallButton();
+        });
+
+        // Listen for successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 DevCard installed successfully!');
+            this.hideInstallButton();
+            devCardInstance.showNotification('DevCard installed! 🎉', 'success');
+        });
+    }
+
+    showInstallButton() {
+        // Create install button
+        const installButton = document.createElement('button');
+        installButton.id = 'installPWA';
+        installButton.className = 'btn secondary install-btn';
+        installButton.innerHTML = '<i class="fas fa-download"></i> Install App';
+        installButton.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            transition: all 0.3s ease;
+        `;
+
+        installButton.addEventListener('click', () => this.installPWA());
+        document.body.appendChild(installButton);
+
+        // Add hover effect
+        installButton.addEventListener('mouseenter', () => {
+            installButton.style.transform = 'scale(1.05)';
+        });
+        installButton.addEventListener('mouseleave', () => {
+            installButton.style.transform = 'scale(1)';
+        });
+    }
+
+    hideInstallButton() {
+        const installButton = document.getElementById('installPWA');
+        if (installButton) {
+            installButton.remove();
+        }
+    }
+
+    async installPWA() {
+        if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('✅ User accepted PWA install');
+            } else {
+                console.log('❌ User dismissed PWA install');
+            }
+            
+            this.deferredPrompt = null;
+            this.hideInstallButton();
+        }
+    }
+
+    showInstallPrompt() {
+        // Show notification about PWA capabilities
+        setTimeout(() => {
+            devCardInstance?.showNotification('💡 This app can be installed for offline use!', 'info');
+        }, 5000);
+    }
+}
+
 // Initialize the DevCard when DOM is loaded
 let devCardInstance;
-let typingTest, codeRunner, memoryGame, aiChat, analytics;
+let typingTest, codeRunner, memoryGame, aiChat, analytics, pwaInstaller, apis;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize main DevCard
@@ -1007,6 +1270,8 @@ document.addEventListener('DOMContentLoaded', () => {
         memoryGame = new MemoryGame();
         aiChat = new AIChat();
         analytics = new Analytics();
+        apis = new APIs();
+        pwaInstaller = new PWAInstaller();
     }, 100);
     
     // Initialize background effects

@@ -755,6 +755,274 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* API Integrations Section */
+.api-integrations {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+
+.api-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.api-widget {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.api-widget:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+}
+
+.api-widget h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.widget-content {
+    min-height: 100px;
+}
+
+/* Weather Widget */
+.weather-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.weather-icon {
+    font-size: 3rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.weather-details {
+    flex: 1;
+}
+
+.weather-temp {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.weather-location {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.weather-condition {
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.weather-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* Spotify Widget */
+.spotify-playing, .spotify-idle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.spotify-playing i, .spotify-idle i {
+    font-size: 2rem;
+    color: #1db954;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.spotify-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.spotify-track {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spotify-artist {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.spotify-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #1db954;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.spotify-progress .time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.spotify-idle {
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+/* GitHub Heatmap Widget */
+.heatmap-title {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(53, 1fr);
+    gap: 2px;
+    margin: 1rem 0;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.heatmap-day {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.heatmap-day:hover {
+    transform: scale(1.5);
+    z-index: 10;
+    position: relative;
+}
+
+.heatmap-day[data-level="0"] {
+    background: var(--border-color);
+}
+
+.heatmap-day[data-level="1"] {
+    background: #c6e48b;
+}
+
+.heatmap-day[data-level="2"] {
+    background: #7bc96f;
+}
+
+.heatmap-day[data-level="3"] {
+    background: #239a3b;
+}
+
+.heatmap-day[data-level="4"] {
+    background: #196127;
+}
+
+.heatmap-summary {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Loading animation */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 2rem;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design for API widgets */
+@media (max-width: 768px) {
+    .api-widgets {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .api-widget {
+        padding: 1rem;
+    }
+    
+    .heatmap-grid {
+        grid-template-columns: repeat(26, 1fr);
+    }
+    
+    .heatmap-day {
+        width: 8px;
+        height: 8px;
+    }
+}
+
 /* Analytics Dashboard */
 .analytics-dashboard {
     max-width: 1400px;
