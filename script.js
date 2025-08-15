@@ -1,19 +1,6 @@
 // DevCard - Interactive Developer Business Card JavaScript
 // Advanced Version with Games, Analytics, AI Chat, and More!
 
-class DevCard {
-    constructor() {
-        this.isFlipped = false;
-        this.currentTheme = localStorage.getItem('theme') || 'light';
-        this.githubUsername = 'William-osei';
-        this.typingTest = new TypingTest();
-        this.codeRunner = new CodeRunner();
-        this.memoryGame = new MemoryGame();
-        this.aiChat = new AIChat();
-        this.analytics = new Analytics();
-        this.particleSystem = null;
-        this.init();
-    }
 
 class TypingTest {
     constructor() {
@@ -1150,9 +1137,11 @@ function initTypingTest() {
 // Loading screen management
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
-    setTimeout(() => {
-        loadingScreen.classList.add('hidden');
-    }, 2000); // Show loading for 2 seconds
+    if (loadingScreen) {
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+        }, 1000); // Reduced to 1 second for faster loading
+    }
 }
 
 // PWA Installation
@@ -1259,20 +1248,39 @@ class PWAInstaller {
 let devCardInstance;
 let typingTest, codeRunner, memoryGame, aiChat, analytics, pwaInstaller, apis;
 
+// Ensure loading screen is hidden after maximum 3 seconds regardless of initialization status
+setTimeout(() => {
+    hideLoadingScreen();
+}, 3000);
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize main DevCard
-    devCardInstance = new DevCard();
-    
-    // Initialize games and features after a short delay to ensure DOM is ready
-    setTimeout(() => {
-        typingTest = new TypingTest();
-        codeRunner = new CodeRunner();
-        memoryGame = new MemoryGame();
-        aiChat = new AIChat();
-        analytics = new Analytics();
-        apis = new APIs();
-        pwaInstaller = new PWAInstaller();
-    }, 100);
+    try {
+        // Initialize main DevCard
+        devCardInstance = new DevCard();
+        
+        // Initialize games and features after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            try {
+                typingTest = new TypingTest();
+                codeRunner = new CodeRunner();
+                memoryGame = new MemoryGame();
+                aiChat = new AIChat();
+                analytics = new Analytics();
+                apis = new APIs();
+                pwaInstaller = new PWAInstaller();
+                
+                console.log('✅ All features initialized successfully');
+            } catch (error) {
+                console.error('❌ Error initializing features:', error);
+                // Still show the card even if some features fail
+                hideLoadingScreen();
+            }
+        }, 100);
+    } catch (error) {
+        console.error('❌ Error initializing DevCard:', error);
+        // Hide loading screen even if initialization fails
+        hideLoadingScreen();
+    }
     
     // Initialize background effects
     initParticles();
