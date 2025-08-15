@@ -324,7 +324,8 @@ class AIChat {
         this.isOpen = false;
         this.responses = {
             'skills': "William is proficient in HTML, CSS, JavaScript, Python, and Git. He's currently learning React and always exploring new technologies!",
-            'projects': "William has worked on personal portfolios, this amazing DevCard, calculator apps, and various Python learning projects. Check out his GitHub!",
+            'projects': "William has worked on personal portfolios, this amazing DevCard, the Smart Calculator Pro with advanced scientific functions, Snake Game, IoT Weather Station, and various other projects. Check out his GitHub!",
+            'calculator': "William built Smart Calculator Pro - an advanced scientific calculator with memory operations, keyboard support, and responsive design. You can find it at https://github.com/William-osei/smart-calculator-pro!",
             'education': "William is a Computer Engineering student at KNUST (Kwame Nkrumah University of Science and Technology) in Ghana, started in 2023.",
             'contact': "You can reach William at trickskidwilliam@gmail.com or connect on LinkedIn and GitHub. He's always open to collaboration!",
             'experience': "William is building his experience through personal projects, coursework, and continuous learning. He's passionate about web development and software engineering.",
@@ -779,43 +780,67 @@ class DevCard {
             </div>
         `;
         
-        // Enhanced default projects with better descriptions and links
+        // Enhanced default projects with actual repositories
         const defaultProjects = [
             {
                 name: 'DevCard - Interactive Business Card',
                 description: 'A cutting-edge interactive web-based business card featuring games, AI chat, analytics dashboard, and PWA support. Built with vanilla JavaScript, HTML5, and CSS3.',
                 html_url: 'https://github.com/William-osei/DevCard-Interactive-Business-Card',
+                homepage: 'https://william-osei.github.io/DevCard-Interactive-Business-Card/',
                 language: 'JavaScript',
                 topics: ['business-card', 'interactive', 'pwa', 'web-development', 'games'],
                 stargazers_count: 0,
                 updated_at: new Date().toISOString()
             },
             {
-                name: 'Personal Portfolio Website',
-                description: 'A responsive portfolio website showcasing my skills, projects, and journey as a Computer Engineering student. Features modern design and smooth animations.',
-                html_url: 'https://github.com/William-osei/William-osei',
+                name: 'Smart Calculator Pro',
+                description: 'Advanced scientific calculator with memory operations, keyboard support, and responsive design built with vanilla JavaScript.',
+                html_url: 'https://github.com/William-osei/smart-calculator-pro',
+                homepage: 'https://william-osei.github.io/smart-calculator-pro/',
+                language: 'JavaScript',
+                topics: ['calculator', 'scientific-calculator', 'javascript', 'responsive-design', 'keyboard-support'],
+                stargazers_count: 0,
+                updated_at: '2025-06-12T21:59:13Z'
+            },
+            {
+                name: 'Snake Game',
+                description: 'Classic Snake game with Python GUI and HTML5/JavaScript versions. Features progressive difficulty, score tracking, and collision detection algorithms.',
+                html_url: 'https://github.com/William-osei/snake-game',
+                homepage: 'https://william-osei.github.io/snake-game/',
+                language: 'HTML',
+                topics: ['game', 'snake-game', 'python', 'javascript', 'html5'],
+                stargazers_count: 0,
+                updated_at: '2025-06-12T21:58:02Z'
+            },
+            {
+                name: 'Data Analysis Dashboard',
+                description: 'Interactive web-based data analysis dashboard with real-time visualizations built for comprehensive data insights.',
+                html_url: 'https://github.com/William-osei/data-analysis-dashboard',
+                homepage: 'https://william-osei.github.io/data-analysis-dashboard/',
+                language: 'JavaScript',
+                topics: ['data-analysis', 'dashboard', 'visualizations', 'charts', 'web-app'],
+                stargazers_count: 0,
+                updated_at: '2025-06-12T21:38:27Z'
+            },
+            {
+                name: 'IoT Weather Station',
+                description: 'Real-time IoT Weather Station Dashboard with interactive monitoring and alerts for comprehensive weather tracking.',
+                html_url: 'https://github.com/William-osei/iot-weather-station',
+                homepage: 'https://william-osei.github.io/iot-weather-station/',
+                language: 'JavaScript',
+                topics: ['iot', 'weather-station', 'dashboard', 'real-time', 'monitoring'],
+                stargazers_count: 0,
+                updated_at: '2025-06-12T21:46:29Z'
+            },
+            {
+                name: 'Portfolio Website',
+                description: 'Professional portfolio website showcasing my development journey, projects, and skills as a Computer Engineering student.',
+                html_url: 'https://github.com/William-osei/portfolio',
+                homepage: 'https://william-osei.github.io/portfolio/',
                 language: 'HTML',
                 topics: ['portfolio', 'responsive', 'css3', 'javascript', 'web-design'],
                 stargazers_count: 0,
-                updated_at: '2024-01-15T00:00:00Z'
-            },
-            {
-                name: 'Python Learning Journey',
-                description: 'A collection of Python exercises, algorithms, and small projects documenting my programming fundamentals learning journey at KNUST.',
-                html_url: 'https://github.com/William-osei/python-learning',
-                language: 'Python',
-                topics: ['python', 'learning', 'algorithms', 'data-structures', 'education'],
-                stargazers_count: 0,
-                updated_at: '2023-12-01T00:00:00Z'
-            },
-            {
-                name: 'Web Calculator App',
-                description: 'A modern, responsive calculator application with scientific functions, theme switching, and keyboard support. Perfect for daily calculations.',
-                html_url: 'https://github.com/William-osei/calculator-app',
-                language: 'JavaScript',
-                topics: ['calculator', 'responsive', 'javascript', 'css3', 'math'],
-                stargazers_count: 0,
-                updated_at: '2023-11-20T00:00:00Z'
+                updated_at: '2025-06-12T11:38:06Z'
             }
         ];
 
